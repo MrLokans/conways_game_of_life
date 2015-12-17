@@ -9,7 +9,7 @@ FIELD_SIZE = 100
 OFF_STATE = 0
 ON_STATE = 255
 MINIMUM_FIELD_SIZE = 8
-UPDATE_INTERVAL = 100
+UPDATE_INTERVAL = 50
 
 
 def add_glider(grid, i, j):
@@ -19,14 +19,38 @@ def add_glider(grid, i, j):
         [OFF_STATE, ON_STATE, ON_STATE],
         [ON_STATE, ON_STATE, OFF_STATE]])
     grid[i:i+3, j:j+3] = glider
- 
+
+
+def add_loaf(grid, i, j):
+    """Adds a loaf to grid starting from (i, j) coords"""
+    loaf = np.array([
+        [OFF_STATE, ON_STATE, ON_STATE, OFF_STATE],
+        [ON_STATE, OFF_STATE, OFF_STATE, ON_STATE],
+        [OFF_STATE, ON_STATE, OFF_STATE, ON_STATE],
+        [OFF_STATE, OFF_STATE, ON_STATE, OFF_STATE]])
+    grid[i:i+4, j:j+4] = loaf
+
+
+def add_blinker(grid, i, j):
+    """Adds a blinker to grid starting from (i, j) coords"""
+    blinker = np.array([
+        [OFF_STATE, ON_STATE, OFF_STATE],
+        [OFF_STATE, ON_STATE, OFF_STATE],
+        [OFF_STATE, ON_STATE, OFF_STATE]])
+    grid[i:i+3, j:j+3] = blinker
+
+
+def add_custom_pattern(grid, i, j, pattern):
+    h = len(pattern)
+    w = len(pattern[0])
+    grid[i:i+h, j:j+w] = blinker
+
 
 def generate_random_grid(size=FIELD_SIZE):
-    return np.random.choice([OFF_STATE, ON_STATE], size*size, p=[0.1, 0.9]).reshape(size, size)
+    return np.random.choice([OFF_STATE, ON_STATE], size*size, p=[0.5, 0.5]).reshape(size, size)
 
 
-def update_field(frame_number, grid, field_size, img, ):
-    print "Animating.."
+def update_field(frame_number, grid, field_size, img):
     new_grid = grid.copy()
     for i in range(field_size):
         for j in range(field_size):
@@ -38,9 +62,9 @@ def update_field(frame_number, grid, field_size, img, ):
             if grid[i, j] == ON_STATE:
                 if (sum_around < 2) or (sum_around > 3):
                     new_grid[i, j] = OFF_STATE
-                else:
-                    if sum_around == 3:
-                        new_grid[i, j] = ON_STATE
+            else:
+                if sum_around == 3:
+                    new_grid[i, j] = ON_STATE
     img.set_data(new_grid)
     grid[:] = new_grid[:]
     return img,
@@ -65,14 +89,16 @@ def main():
 
     if args.glider:
         grid = np.zeros(FIELD_SIZE*FIELD_SIZE).reshape(FIELD_SIZE, FIELD_SIZE)
+        # add_glider(grid, 1, 1)
+        add_blinker(grid, 1, 1)
     else:
         grid = generate_random_grid(FIELD_SIZE)
 
     fig, ax = plt.subplots()
     img = ax.imshow(grid, interpolation='nearest')
-    print "Starting animation"
-    animation.FuncAnimation(fig, update_field, fargs=(grid, FIELD_SIZE, img, ),
-                            frames=100, interval=UPDATE_INTERVAL, save_count=50)
+    anim = animation.FuncAnimation(fig, update_field, fargs=(grid, FIELD_SIZE, img, ),
+                            frames=200, interval=UPDATE_INTERVAL, save_count=50)
+    # anim.save('conway_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
     plt.show()
 
 if __name__ == '__main__':
