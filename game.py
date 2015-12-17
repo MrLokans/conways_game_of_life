@@ -3,21 +3,23 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 FIELD_SIZE = 10
+OFF_STATE = 0
+ON_STATE = 255
 
 
 def add_glider(grid, i, j):
     """Adds a glider to grid starting from (i, j) coords"""
     glider = np.array([
-        [255, 0, 0],
-        [0, 255, 255],
-        [255, 255, 0]])
+        [ON_STATE, OFF_STATE, OFF_STATE],
+        [OFF_STATE, ON_STATE, ON_STATE],
+        [ON_STATE, ON_STATE, OFF_STATE]])
     grid[i:i+3, j:j+3] = glider
 
 
-x = np.array([[0, 0, 255], [255, 255, 0], [0, 255, 0]])
+x = np.array([[OFF_STATE, OFF_STATE, ON_STATE], [ON_STATE, ON_STATE, OFF_STATE], [OFF_STATE, ON_STATE, OFF_STATE]])
 
 
-grid = np.random.choice([0, 255], 4*4, p=[0.1, 0.9]).reshape(4, 4)
+grid = np.random.choice([OFF_STATE, ON_STATE], 4*4, p=[0.1, 0.9]).reshape(4, 4)
 
 
 def main():
